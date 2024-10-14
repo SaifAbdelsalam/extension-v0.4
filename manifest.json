@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "OpExpert Vault",
+  "description": "OpExpert Vault is a robust browser extension, exclusively tailored for OpExpert, utilizing HashiCorp's Vault backend for top-tier encryption.",
+  "version": "0.4.2",
+  "action": {
+    "default_icon": "icons/logo128.png",
+    "default_popup": "home.html",
+    "default_title": "OpExpert Vault"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["login.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "48": "icons/logo48.png",
+    "128": "icons/logo128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "browser-polyfill.min.js",
+        "content.js"
+      ]
+    }
+  ],
+  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage",
+    "clipboardWrite",
+    "debugger",
+    "scripting"
+  ]
+}

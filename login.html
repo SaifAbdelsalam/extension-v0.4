@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login | OpExpert Vault</title>
+    <meta charset="utf-8" />
+    <script
+      type="application/javascript"
+      src="browser-polyfill.min.js"
+    ></script>
+    <style>
+        @font-face {
+            font-family: 'Futura65medium'; /* Name your font */
+            src: url('Futura Medium.otf') format('opentype'); /* Path to your font file */
+            /* Optionally, specify additional font properties like font-weight and font-style here */
+        }
+        body {
+            width: 375px;
+            height: 600px;
+            background-color: #F0F0F0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            font-family: 'Futura65medium', 'Nunito', sans-serif;
+        }
+        .header {
+            width: 100%;
+            background-color: #1855A3;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .title {
+            color: #999;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: left;
+        }
+        .input-group {
+            margin: 20px 0;
+            width: 100%;
+            text-align: left;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .login-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: transparent;
+            color: #1855A3;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 1px solid #1855A3;
+        }
+     
+
+        .login-button:hover {
+            background-color: #1855A3;
+            color: white;
+        }
+        .reset-button {
+            display: none;
+            color: red;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            margin-left: auto;
+        }
+        .reset-button:hover {
+            background-color: red;
+            color: white;
+        }
+        .notification-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff10;
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+        }
+        
+        .notification {
+            position: absolute;
+            top: 12%;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            font-size: 12px;
+            width: 70%;
+        }
+        
+        .notification button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        #proceed-reset {
+            background: transparent;
+            color: red;
+        }
+        #cancel-reset {
+            background: transparent;
+            color: #1855A3;
+        }
+        #proceed-reset:hover {
+            background: red;
+            color: white;
+        }
+        #cancel-reset:hover {
+            background: #1855A3;
+            color: white;
+        }
+
+/* General styles */
+.header2 {
+    background-color: #003c89 !important;
+    color: #fff !important;
+    width: 100%;
+    padding: 3px 0;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark theme styles */
+.dark-theme .header2 {
+    background-color: #7474745c !important;
+    color: #999 !important;
+}
+
+/* Light theme styles */
+.light-theme .header2 {
+    background-color: #003c89 !important;
+    color: #fff !important;
+}
+
+
+
+        
+    </style>
+</head>
+<body>
+ 
+            
+    <div class="header"><img style="width: 110px;" src="./icons/logo_dark.png" alt=""></div>
+    <div class="header2" id="toggleHeader">LOG IN</div>
+    <div class="container">
+        <div role="alert" id="notify" aria-live="assertive"></div>
+        <div class="title">LOG IN</div>
+
+        <div class="input-group">
+            <input id="loginBox" type="email" placeholder="Username" required>
+            <input id="passBox" type="password" placeholder="Password" required>
+            <input id="keyBox" type="text" placeholder="Key" required>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+            <button class="login-button">Log in</button>
+            <button class="reset-button">Reset Key</button>
+        </div>       
+    </div>
+    <div class="notification-container" id="notificationContainer">
+        <div class="notification">
+            <p id="notificationMessage">Are you sure you want to proceed?</p>
+            <div style="display: flex;justify-content: flex-end;gap: 10px;">
+                <button id="proceed-reset">Proceed</button>
+            <button id="cancel-reset">Cancel</button>
+            </div>
+            
+        </div>
+    </div>
+    <script src="Notify.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>

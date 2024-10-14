@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Settings | OpExpert Vault</title>
+    <meta charset="utf-8" />
+    
+    <script type="application/javascript" src="browser-polyfill.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        @font-face {
+            font-family: 'Futura65medium'; /* Name your font */
+            src: url('Futura Medium.otf') format('opentype'); /* Path to your font file */
+            /* Optionally, specify additional font properties like font-weight and font-style here */
+        }
+        :root {
+            --background-color: #F0F0F0;
+            --header-background-color: #1855A3;
+            --header2-background-color: #1e63bb;
+            --header-text-color: white;
+            --title-color: #999;
+            --container-background-color: white;
+            --container-text-color: #1855A3;
+            --text-color: #555;
+            --input-background-color: white;
+            --input-text-color: #555;
+            --input-border-color: #ccc;
+            --link-color: #1855A3;
+            --link-hover-color: #143f77;
+            --link-hover-background: #1855A310;
+            --button-background: #1855A310;
+            --button-text-color: #1855A3;
+            --button-hover-background: #1855A3;
+            --button-hover-text-color: white;
+            --scrollbar-thumb-color: #555;
+            --footer-background: white;
+            --footer-button: #444;
+        }
+        .dark-theme {
+            --background-color: #161C26;
+            --header-background-color: #2F343D;
+            --header2-background-color: #7474745c;
+            --header-text-color: white;
+            --title-color: #999;
+            --container-background-color: #2F343D;
+            --container-text-color: #73A4FF;
+            --text-color: #ccc;
+            --input-background-color: #2F343D;
+            --input-text-color: white;
+            --input-border-color: #ccc;
+            --link-color: #73A4FF;
+            --link-hover-color: white;
+            --link-hover-background: #73a4ff;
+            --button-background: #1855A310;
+            --button-text-color: #73A4FF;
+            --button-hover-background: #73A4FF;
+            --button-hover-text-color: white;
+            --scrollbar-thumb-color: #555;
+            --footer-background: #2F343D;
+            --footer-button: #BAC0CE;
+        }
+
+        body {
+            width: 375px;
+            height: 600px;
+            max-height: 600px;
+            background-color: var(--background-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Futura65medium', 'Nunito', sans-serif;
+        }
+        .header {
+            width: 100%;
+            background-color: var(--header-background-color);
+            color: var(--header-text-color);
+            padding: 10px 0;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .container {
+            flex: 1;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .title {
+            color: var(--title-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: left;
+            display: grid;
+            grid-template-columns: auto auto;
+            justify-content: space-between;
+        }
+        .input-group {
+            margin: 20px 0;
+            width: 100%;
+            text-align: left;
+            color: var(--text-color);
+        }
+        .input-group input {
+            width: 100%;
+            border: none;
+            font-size: 1rem;
+            box-sizing: border-box;
+            margin-top: 3px;
+            background-color: var(--input-background-color);
+            color: var(--input-text-color);
+        }
+        .input-group input:focus {
+            outline: none;
+            border: none;
+            color: var(--input-text-color);
+        }
+        .username-wrapper {
+            position: relative;
+            border: 1px solid var(--input-border-color);
+            border-radius: 5px;
+            background-color: var(--input-background-color);
+            padding: 5px;
+            margin: 5px 0 5px 0;
+            border-color: transparent;
+        }
+        .password-wrapper {
+            position: relative;
+            border: 1px solid var(--input-border-color);
+            border-radius: 5px;
+            background-color: var(--input-background-color);
+            padding: 5px;
+            margin: 5px 0 5px 0;
+            border-color: transparent;
+        }
+        .password-wrapper input {
+            width: 100%;
+            padding-right: 40px;
+        }
+        .password-wrapper i {
+            position: absolute;
+            right: 15px;
+            top: 70%;
+            transform: translateY(-50%);
+            color: var(--link-color);
+            cursor: pointer;
+        }
+        .password-wrapper i:hover {
+            color: var(--link-hover-color);
+        }
+        #updatePass {
+            background-color: transparent;
+            color: var(--link-color);
+            padding: 10px;
+            border: none;
+            margin: 0;
+            cursor: pointer; 
+        }
+    
+        #updatePass:hover {
+            background-color: var(--link-color); 
+            color: var(--input-background-color); 
+        }
+        #logoutButton {
+            background-color: transparent;
+            color: var(--button-text-color);
+            padding: 10px;
+            border: none;
+            margin: 0;
+            cursor: pointer; 
+        }
+    
+        #logoutButton:hover, #themeToggle:hover, button:hover {
+            background-color: none !important;
+            color: #1855a3;
+        }
+        #themeToggle {
+            all: unset;
+            padding: 1px 10px;
+            background-color: var(--container-background-color);
+            color: var(--button-text-color);
+            font-weight: normal;
+        }
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--button-background);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        .section-title {
+            font-weight: bold;
+            color: var(--title-color);
+        }
+        .link-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--container-background-color);
+            padding: 10px;
+            margin: 2.5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            color: var(--container-text-color);
+            font-size: 1rem;
+            height: 30px;
+        }
+        .link-item:hover {
+            background-color: var(--link-hover-background);
+            color: var(--link-hover-color);
+        }
+        .container::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(209, 209, 209, 0);
+            border-radius: 10px;
+            background-color: transparent;
+        }
+        .container::-webkit-scrollbar {
+            width: 5px;
+            background-color: transparent;
+        }
+        .container::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(209, 209, 209, 0);
+            background-color: var(--scrollbar-thumb-color);
+        }
+        .footer {
+            width: 100%;
+            background-color: var(--footer-background);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 50px;
+            margin-top: auto;
+        }
+        .footer a {
+            text-decoration: none;
+            color: var(--footer-button);
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .footer a:hover {
+            color: var(--link-color);
+        }
+        .footer a i {
+            display: block;
+            margin: 0px auto 5px;
+            font-size: 1.8rem;
+        }
+        .info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--container-background-color);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgleftba(0, 0, 0, 0.1);
+        }
+
+        .notify {
+            width: 330px;
+            display: grid;
+            align-items: center;
+            justify-content: space-between;
+            grid-template-columns: auto auto;
+            margin: 20px;
+            padding: 10px;
+            position: relative;
+        }
+        .notify__button {
+            all: unset;
+            position: absolute;
+            top: 5px;
+            right: 7px;
+            opacity: 0.5;
+            transition: opacity 250ms ease-in-out;
+        }  
+        .notify__button:hover,
+        .notify__button:focus,
+        .notify__button:active {
+            opacity: 1;
+            background-color: transparent;
+        }
+        .notify--success {
+            background-color: #b4fba7;
+        }
+        .notify--error {
+            background-color: #FF8B8B;
+        }
+
+        
+        .link-item:hover {
+            background-color: var(--link-hover-background);
+            color: var(--link-hover-color);
+        }
+        .footer a i {
+            display: block;
+            margin: 0 auto 5px;
+            font-size: 24px;
+        }
+ 
+        #logoutButton {
+            background-color: transparent;
+            color: var(--button-text-color);
+            padding: 6px;
+            border: 1px solid var(--bulefttton-hover-background);
+            margin: 0;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        #updatePass {
+            background-color: transparent;
+            color: var(--button-text-color);
+            padding: 6px;
+            border: 1px solid var(--button-hover-background);
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            height: 40px;
+            width: 150px;
+            margin-top: 3px;
+        }
+
+        .title {
+            color: var(--title-color);
+            font-size: 15px;
+            font-weight: bold;
+            text-align: left;
+            display: grid;
+            grid-template-columns: auto auto;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        #updatePass:hover {
+            background-color: var(--button-hover-background);
+            color: #fff;
+        }
+
+        #themeToggle {
+            all: unset;
+            padding: 1px 10px;
+            background-color: none !important;
+            color: var(--button-text-color);
+            font-weight: normal;
+        }
+
+      
+
+
+        #logoutButton:hover, #themeToggle:hover, button:hover {
+            background-color: none !important;
+            color: #ffffff;
+        }
+
+
+        .accordion-header {
+            background-color: #eee;
+            padding: 1em;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            display: flex;
+            align-items: center;
+            background-color: var(--container-background-color);
+            padding: 10px;
+            margin: 2.5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 13px;
+            height: 18px;
+            font-weight:bold;
+        }
+      
+        
+        .accordion-content {
+            padding: 1em;
+            display: none;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        
+        .accordion-content.show {
+            display: block;
+            max-height: 1000px;
+            background-color: aliceblue;
+            border-radius: 10px;
+        }
+        
+        .accordion-header i {
+            transition: transform 0.3s ease;
+            font-size: 15px;
+        }
+        .accordion-header i.rotate {
+            transform: rotate(180deg);
+        }
+
+
+        #logoutButton:hover, #themeToggle:hover, button:hover {
+            background-color: var(--button-hover-background) !important;
+            color: #fff;
+        }
+
+        .header {
+            width: 100%;
+            background-color: var(--header-background-color);
+            color: var(--header-text-color);
+            padding: 5px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+
+      
+
+        /* General styles */
+        .header2 {
+            background-color: var(--header2-background-color);
+            width: 100%;
+            padding: 3px 0;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            color: var(--header-text-color);
+        }
+
+        
+
+            /* Popup Styles */
+
+
+        .popup-content input {
+            display: block;
+            width: calc(100% - 20px);
+            background-color: var(--input-background-color);
+            padding: 10px;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+        }
+
+       
+
+        .popup-content {
+            background: white;
+            background-color: var(--container-background-color);
+            color: var(--input-text-color);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+    .popup-content button {
+        margin: 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    #confirmChange:hover {
+            background-color: var(--button-hover-background);
+            color: #fff;
+        }
+    
+
+    #confirmChange {
+        background-color: transparent;
+        color: var(--button-text-color);
+    }
+
+    #cancelChange:hover {
+            background-color: var(--button-hover-background);
+            color: #fff;
+        }
+
+    #cancelChange {
+        background-color: transparent;
+        color: var(--button-text-color);
+    }
+
+
+    </style>
+</head>
+<body class="dark-theme" style="position: relative;"> 
+    <div class="header"><img style="width: 110px;" src="./icons/logo_dark.png" alt=""></div>
+    <div class="header2" id="toggleHeader">Settings</div>
+    <div role="alert" id="notify" aria-live="assertive"></div>
+    <div class="container">
+        <div class="title"><span>ACCOUNT</span>
+            <div>
+                <div style="    border-radius: 50%;
+    padding: 8px 10px !important;
+    cursor: pointer;"  id="themeToggle"><i  class="fa fa-moon"></i></div>
+            </div>
+        </div>
+        <div class="input-group">
+            <div class="info">
+                <div style="display: flex; align-items: center;">
+                    <!-- <div style="background-color: #1855A3; width: 35px; height: 35px; border-radius: 50%; margin-right: 10px;"></div> -->
+                    <span id="vAddress">xyz@abc.com</span>
+                </div>
+                <button id="logoutButton">Logout</button>
+            </div>
+            <div class="username-wrapper">
+                <div>Username</div>
+                <input type="text" id="username" readonly>
+            </div>
+            <div class="password-wrapper">
+                <div>Password</div>
+                <input type="password" id="password">
+                <i class="fa fa-eye" id="eyeIcon"></i>
+            </div>
+            <button id="updatePass">Change Password</button>
+        </div>
+
+<!-- Popup HTML Structure -->
+<div id="popup" class="popup-overlay">
+    <div class="popup-content">
+        <span class="popup-close" id="popupClose">&times;</span>
+        <h2>Change Password</h2>
+        <div>
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" placeholder="Enter new password">
+        </div>
+        <div>
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+        </div>
+        <button id="confirmChange">Confirm</button>
+        <button id="cancelChange">Cancel</button>
+    </div>
+</div>
+
+
+
+        <div class="title section-title">OTHERS</div>
+   
+
+        <!-- accordion -->
+        <div class="accordion">
+            <div class="accordion-header  link-item">
+                <span>ABOUT</span>
+                <i class="fas fa-angle-down"></i>
+            </div>
+            <div class="accordion-content" id="accordion-content">
+                The OpExpert Password Manager Plugin provides secure and efficient password management with a user-friendly interface and auto-fill capabilities. Learn more at <a target="_blank" href="https://www.opexpert.com" class="external-link">www.opexpert.com</a>
+            </div>
+        </div>
+        <div class="accordion">
+            <div class="accordion-header  link-item">
+                <span>HELP</span>
+                <i class="fas fa-angle-down"></i>
+            </div>
+            <div class="accordion-content" id="accordion-content">
+                For assistance with OpExpert, contact our customer service team at <a target="_blank" href="https://www.opexpert.com" class="external-link">support@opexpert.com</a>
+            </div>
+        </div>
+        <div class="accordion">
+            <div class="accordion-header  link-item">
+                <span>PRIVACY POLICY</span>
+                <i class="fas fa-angle-down"></i>
+            </div>
+            <div class="accordion-content" id="accordion-content">
+                Learn more at <a target="_blank" href="www.opexpert.com" class="external-link">www.opexpert.com/privacypolicy</a>
+            </div>
+        </div>
+        
+    </div>
+    <div class="aboutPage">
+
+    </div>
+    <div class="helpPage">
+
+    </div>
+    <div class="policyPage">
+
+    </div>
+    <div class="footer">
+        <a href="home.html" style="    display: flex;
+    align-items: center;
+    flex-direction: column;">
+
+     
+<i class="fas fa-home"></i>
+                
+            Home
+        </a>
+        <a href="secrets.html">
+            <i class="fa fa-lock"></i>
+            Secrets
+        </a>
+        <a href="settings.html" style="color: var(--link-color);">
+            <i class="fa fa-cog"></i>
+            Settings
+        </a>
+    </div>
+    <script src="Notify.js"></script>
+    <script src="settings.js"></script>
+  
+</body>
+</html>
