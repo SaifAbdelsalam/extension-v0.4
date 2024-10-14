@@ -164,9 +164,6 @@ async function mainLoaded() {
   });
 }
 
-
-
-
 async function generateMoveFolders() {
   updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
   const secretsMoveContainer = document.getElementById('secretsmove');
@@ -206,87 +203,104 @@ async function generateMoveFolders() {
   }
 }
 
+
 async function generateMoveSubfolders(folderName) {
-  const secretsMoveContainer = document.getElementById('secretsmove');
-  secretsMoveContainer.innerHTML = ''; 
-  const namesArray = (await browser.storage.local.get("vaultNames")).vaultNames || [];
+const secretsMoveContainer = document.getElementById('secretsmove');
+secretsMoveContainer.innerHTML = ''; 
+const namesArray = (await browser.storage.local.get("vaultNames")).vaultNames || [];
 
-  if (finalData) {
-      let subfolderFound = false;
+const lastFolderName = folderName.substring(folderName.lastIndexOf('/') + 1);
 
-      namesArray.forEach(nameObject => {
-          const folderPath = Object.keys(nameObject)[0].replace(/\/+$/, '');
+// Recursive function to search through the folder structure
+function findFolder(entries, folderToFind) {
+    for (const entry of entries) {
+        const folderPath = Object.keys(entry)[0];
+        const contents = entry[folderPath];
 
-          if (folderPath === folderName) {
-              const entries = nameObject[folderPath + '/'];
-              if (Array.isArray(entries)) {
-                  subfolderFound = true;
-                  extractMoveFolder(entries, folderName);
-                  updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
-              }
-          }
-      });
+        // Check if the current folder path matches the last folder name
+        if (folderPath.replace(/\/+$/, '') === folderToFind) {
+            return contents; // Return the entries if found
+        }
 
-      if (subfolderFound) {
-          notify.success("Subfolders loaded successfully.", { time: 1500 });
-      } else {
-          notify.info("No subfolders found.", { time: 1500 });
-      }
-  } else {
-      notify.error("Failed to retrieve subfolder data.", { time: 2000 });
-  }
+        // If the contents are an array, recursively search them
+        if (Array.isArray(contents)) {
+            const foundEntries = findFolder(contents, folderToFind);
+            if (foundEntries) {
+                return foundEntries; // Return the found entries
+            }
+        }
+    }
+    return null; 
 }
 
-async function extractMoveFolder(data, currentPath) {
-  const secretsMoveContainer = document.getElementById('secretsmove');
-  for (const secretItem of data) {
-      if (typeof secretItem === 'object') {
-          const subfolderName = Object.keys(secretItem)[0];
-          const subfolderPath = `${currentPath}/${subfolderName}/`.replace(/\/+$/, '');
+if (finalData) {
+    const entries = findFolder(namesArray, lastFolderName);
+    if (Array.isArray(entries)) {
+        extractMoveFolder(entries, folderName); 
+        updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
 
-          const subfolderId = subfolderPath.toLowerCase().replace(/\s+/g, '-');
-          const subfolderItem = document.createElement('div');
-          subfolderItem.classList.add('item', 'subfolder');
-          subfolderItem.id = subfolderId;
-          subfolderItem.innerHTML = `<i class="fa fa-folder"></i><span>${subfolderName}</span>`;
-          secretsMoveContainer.appendChild(subfolderItem);
+    }
+}
+}
 
-          subfolderItem.addEventListener('click', async (event) => {
-              event.stopPropagation(); 
-              currentSelectedMoveFolder = subfolderPath; 
-              updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
-              await extractImmediateMoveSubfolders(secretItem[subfolderName], subfolderPath);
-          });
-      }
-  }
+async function extractMoveFolder(data, currentPath) {  
+  const secretsContainer = document.getElementById('secretsmove');
+  secretsContainer.innerHTML = ''; 
+    for (const secretItem of data) {
+        if (typeof secretItem === 'object') {
+            const subfolderName = Object.keys(secretItem)[0];
+            const subfolderPath = `${currentPath}/${subfolderName}/`.replace(/\/+$/, ''); 
+            console.log('HERE IS FULLPATH',subfolderPath);
+
+
+            const subfolderId = subfolderPath.toLowerCase().replace(/\s+/g, '-');
+            const subfolderItem = document.createElement('div');
+            subfolderItem.classList.add('item', 'subfolder');
+            subfolderItem.id = subfolderId;
+            subfolderItem.innerHTML = `<i class="fa fa-folder"></i><span>${subfolderName}</span>`;
+            secretsContainer.appendChild(subfolderItem);
+
+
+            subfolderItem.addEventListener('click', async (event) => {
+                event.stopPropagation(); 
+                currentSelectedMoveFolder = subfolderPath; 
+                await extractImmediateMoveSubfolders(secretItem[subfolderName], subfolderPath);
+                updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
+            });
+        }
+    }
+
+
 }
 
 async function extractImmediateMoveSubfolders(data, currentPath) {
-  const secretsMoveContainer = document.getElementById('secretsmove');
-  secretsMoveContainer.innerHTML = ''; 
-
+  const secretsContainer = document.getElementById('secretsmove');
+  secretsContainer.innerHTML = ''; 
   for (const secretItem of data) {
-      if (typeof secretItem === 'object') {
-          const subfolderName = Object.keys(secretItem)[0];
-          const subfolderPath = `${currentPath}/${subfolderName}/`.replace(/\/+$/, '');
+    if (typeof secretItem === 'object') {
+        const subfolderName = Object.keys(secretItem)[0];
+        const subfolderPath = `${currentPath}/${subfolderName}/`.replace(/\/+$/, ''); // Create the full path
 
-          const subfolderId = subfolderPath.toLowerCase().replace(/\s+/g, '-');
-          const subfolderItem = document.createElement('div');
-          subfolderItem.classList.add('item', 'subfolder');
-          subfolderItem.id = subfolderId;
-          subfolderItem.innerHTML = `<i class="fa fa-folder"></i><span>${subfolderName}</span>`;
-          secretsMoveContainer.appendChild(subfolderItem);
+        // Create a UI element for the folder
+        const subfolderId = subfolderPath.toLowerCase().replace(/\s+/g, '-');
+        const subfolderItem = document.createElement('div');
+        subfolderItem.classList.add('item', 'subfolder');
+        subfolderItem.id = subfolderId;
+        subfolderItem.innerHTML = `<i class="fa fa-folder"></i><span>${subfolderName}</span>`;
+        secretsContainer.appendChild(subfolderItem);
 
-          subfolderItem.addEventListener('click', async (event) => {
-              currentSelectedMoveFolder = subfolderPath;
-              updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
-              await extractMoveFolder(secretItem[subfolderName], subfolderPath); 
-          });
-      }
-  }
+        // Add click event to navigate to the immediate subfolder and show secrets
+        subfolderItem.addEventListener('click', async (event) => {
+          currentSelectedMoveFolder = subfolderPath;
+          updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
+          await extractMoveFolder(secretItem[subfolderName], subfolderPath); 
+
+
+
+        });
+    }
 }
-
-
+}
 
 
 function updateCurrentMoveFolderDisplay(currentMoveFolder) {
@@ -294,91 +308,77 @@ function updateCurrentMoveFolderDisplay(currentMoveFolder) {
   const folderDisplayElement = document.getElementById('movepath');
   const secretsContainer = document.getElementById('secretsmove'); 
 
-  // Clear the current display
-  folderDisplayElement.innerHTML = '';   
+  folderDisplayElement.innerHTML = '';
 
-  // Create folder display elements
-  folderParts.forEach((part, index) => {
+  let breadcrumb = folderParts.join(' > '); 
+  const maxWidth = folderDisplayElement.clientWidth; 
+
+  function getTextWidth(text, font) {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      context.font = font || window.getComputedStyle(folderDisplayElement).font;
+      return context.measureText(text).width;
+  }
+
+  const fullFolderParts = [...folderParts];
+
+  let breadcrumbParts = [...folderParts];
+  if (getTextWidth(breadcrumb) > maxWidth && folderParts.length > 4) {
+      breadcrumbParts = [
+          folderParts[0], 
+          folderParts[1], 
+          '...', 
+          folderParts[folderParts.length - 2], 
+          folderParts[folderParts.length - 1]
+      ];
+  }
+
+  for (let index = 0; index < breadcrumbParts.length; index++) {
+      const part = breadcrumbParts[index];
       const folderSpan = document.createElement('span');
       folderSpan.textContent = part;
       folderSpan.style.cursor = 'pointer'; 
 
-      // Add click event listener for each breadcrumb part
       folderSpan.addEventListener('click', async () => {
-          const pathWithoutHome = folderParts.slice(1, index + 1).join('/'); // Omit 'Home'
+          let pathWithoutHome = '';
+          if (part === '...') return;
+
+          if (index === 2 && part === '...') {
+              return;
+          } else if (index < 2) {
+              pathWithoutHome = fullFolderParts.slice(1, index + 1).join('/'); 
+          } else {
+              const adjustedIndex = index + (fullFolderParts.length - breadcrumbParts.length);
+              pathWithoutHome = fullFolderParts.slice(1, adjustedIndex + 1).join('/');
+          }
 
           if (part === 'Home') {
-              generateMoveFolders();
+              window.location.href = 'secrets.html'; 
               currentSelectedMoveFolder = '';
-              updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
-
           } else {
               currentSelectedMoveFolder = pathWithoutHome;
-              secretsContainer.innerHTML = ""; // Clear current secrets
-
-              // Wait for data retrieval before updating the display
-              await getMoveFolderData(pathWithoutHome); 
-              updateCurrentMoveFolderDisplay(currentSelectedMoveFolder);
-
+              secretsContainer.innerHTML = "";
+              await generateMoveSubfolders(pathWithoutHome); 
+              updateCurrentMoveFolderDisplay();
+                
           }
       });
 
-      // Append the folder span to the display element
       folderDisplayElement.appendChild(folderSpan);
 
-      // Add a separator between folder parts
-      if (index < folderParts.length - 1) {
+      if (index < breadcrumbParts.length - 1) {
           const separator = document.createElement('span');
           separator.textContent = ' > ';
           folderDisplayElement.appendChild(separator);
-
-      }
-  });
-}
-
-async function getMoveFolderData(folderName) {
-  const namesArray = (await browser.storage.local.get("vaultNames")).vaultNames || []; // Get vault names
-  console.log("Retrieving data for folder:", folderName);
-
-  for (const nameObject of namesArray) {
-      const folderPath = Object.keys(nameObject)[0].replace(/\/+$/, ''); 
-      console.log("Checking folder path:", folderPath);
-
-      if (folderPath === folderName) {
-          const entries = nameObject[folderPath + '/'];
-
-          if (Array.isArray(entries)) {
-              await extractMoveFolder(entries, folderPath);
-          } else {
-              console.error(`Entries for ${folderName} are not in expected array format:`, entries);
-          }
-          break; 
-      } else {
-          await checkForNestedMoveFolders(nameObject, folderName, folderPath);
       }
   }
 }
 
-// Ensure checkForNestedMoveFolders works properly
-async function checkForNestedMoveFolders(nameObject, targetFolderName, currentPath) {
-  const entries = nameObject[currentPath + '/']; // Get entries of the current path
 
-  if (Array.isArray(entries)) {
-      for (const entry of entries) {
-          const subfolderName = Object.keys(entry)[0]; // Get the name of the subfolder
-          const subfolderPath = `${currentPath}/${subfolderName}/`.replace(/\/+$/, ''); // Construct the full path
-          console.log("Checking nested folder:", subfolderPath);
 
-          if (subfolderPath === targetFolderName) {
-              await extractMoveFolder(entry[subfolderName], subfolderPath); // Extract the contents of this folder
 
-              return; // Stop once the folder is found and processed
-          }
 
-          await checkForNestedMoveFolders(entry, targetFolderName, subfolderPath);
-      }
-  }
-}
+
 
 
 
@@ -407,6 +407,8 @@ async function checkForNestedMoveFolders(nameObject, targetFolderName, currentPa
 
 async function generateFolders() {
     const secretsContainer = document.getElementById('secrets');
+    secretsContainer.innerHTML = ''; 
+
     const folders = new Set();
     
     let namesArray = (await browser.storage.local.get("vaultNames")).vaultNames || [];
@@ -438,8 +440,6 @@ async function generateFolders() {
         });
     }
 }
-
-
 
 async function updateCurrentFolderDisplay(currentFolder) {
   const folderParts = ['Home', ...currentFolder.split('/').filter(Boolean)];
@@ -490,10 +490,6 @@ async function updateCurrentFolderDisplay(currentFolder) {
               pathWithoutHome = fullFolderParts.slice(1, adjustedIndex + 1).join('/');
           }
 
-
-          ///////////////////////////////////////////////////
-          //alert(pathWithoutHome); 
-
           if (part === 'Home') {
               window.location.href = 'secrets.html'; 
               currentSelectedFolder = '';
@@ -501,10 +497,7 @@ async function updateCurrentFolderDisplay(currentFolder) {
               currentSelectedFolder = pathWithoutHome;
               secretsContainer.innerHTML = "";
               filterSecretsByFolder(pathWithoutHome);
-
-              if (index > 1) {
-                  await getFolderData(pathWithoutHome);
-              }
+              await generateSubfolders(pathWithoutHome); 
           }
       });
 
@@ -517,58 +510,6 @@ async function updateCurrentFolderDisplay(currentFolder) {
       }
   }
 }
-
-
-
-async function getFolderData(folderName) {
-  const namesArray = (await browser.storage.local.get("vaultNames")).vaultNames || []; // Get vault names
-  console.log("Retrieving data for folder:", folderName);
-
-  for (const nameObject of namesArray) {
-      const folderPath = Object.keys(nameObject)[0].replace(/\/+$/, ''); 
-      console.log("Checking folder path:", folderPath);
-
-      if (folderPath === folderName) {
-          const entries = nameObject[folderPath + '/'];
-
-          if (Array.isArray(entries)) {
-              await extractFolder(entries, folderPath);
-          } else {
-              console.error(`Entries for ${folderName} are not in expected array format:`, entries);
-          }
-          break; 
-      } else {
-          await checkForNestedFolders(nameObject, folderName, folderPath);
-      }
-  }
-}
-
-async function checkForNestedFolders(nameObject, targetFolderName, currentPath) {
-  const entries = nameObject[currentPath + '/']; 
-
-  if (Array.isArray(entries)) {
-      for (const entry of entries) {
-          const subfolderName = Object.keys(entry)[0]; 
-          const subfolderPath = `${currentPath}/${subfolderName}/`.replace(/\/+$/, '');
-          console.log("Checking nested folder:", subfolderPath);
-
-          if (subfolderPath === targetFolderName) {
-              await extractFolder(entry[subfolderName], subfolderPath); 
-              return; 
-          }
-
-          await checkForNestedFolders(entry, targetFolderName, subfolderPath);
-      }
-  }
-}
-
-
-
-
-
-
-
-
 
 
 async function filterSecretsByFolder(folderName) {
@@ -633,12 +574,13 @@ async function filterSecretsByFolder(folderName) {
 }
 
 
-async function extractFolder(data, currentPath) {
 
+async function extractFolder(data, currentPath) {
 
   console.log("Extracting immediate subfolders for:", currentPath, "Data:", data); // Debugging line
 
     const secretsContainer = document.getElementById('secrets');
+    secretsContainer.innerHTML = ''; 
 
     for (const secretItem of data) {
         if (typeof secretItem === 'object') {
@@ -671,7 +613,8 @@ async function extractFolder(data, currentPath) {
 }
 
 async function extractImmediateSubfolders(data, currentPath) {
-    // This function will only extract immediate subfolders of the provided data
+  const secretsContainer = document.getElementById('secrets');
+  secretsContainer.innerHTML = ''; 
     for (const secretItem of data) {
         if (typeof secretItem === 'object') {
             const subfolderName = Object.keys(secretItem)[0];
@@ -692,7 +635,7 @@ async function extractImmediateSubfolders(data, currentPath) {
             filterSecretsByFolder(subfolderPath);
             console.log('looooook222',subfolderPath);
             currentSelectedFolder = subfolderPath;
-            await extractFolder(secretItem[subfolderName], subfolderPath); // Call extractFolder to continue extraction
+            await extractFolder(secretItem[subfolderName], subfolderPath); 
             updateCurrentFolderDisplay(currentSelectedFolder);
 
 
@@ -702,24 +645,65 @@ async function extractImmediateSubfolders(data, currentPath) {
     }
 }
 
+
+
 async function generateSubfolders(folderName) {
-    const secretsContainer = document.getElementById('secrets');
-    const namesArray = (await browser.storage.local.get("vaultNames")).vaultNames || [];
+  const namesArray = (await browser.storage.local.get("vaultNames")).vaultNames || [];
 
-    if (finalData) {
-        namesArray.forEach(nameObject => {
-            const folderPath = Object.keys(nameObject)[0].replace(/\/+$/, ''); // Remove trailing slash
+  const lastFolderName = folderName.substring(folderName.lastIndexOf('/') + 1);
 
-            // Check if the current folder path matches the start of the folderName
-            if (folderPath === folderName) {
-                const entries = nameObject[folderPath + '/'];
-                if (Array.isArray(entries)) {
-                    extractFolder(entries , folderName); 
-                }
-            }
-        });
-    }
+  // Recursive function to search through the folder structure
+  function findFolder(entries, folderToFind) {
+      for (const entry of entries) {
+          const folderPath = Object.keys(entry)[0];
+          const contents = entry[folderPath];
+
+          // Check if the current folder path matches the last folder name
+          if (folderPath.replace(/\/+$/, '') === folderToFind) {
+              return contents; // Return the entries if found
+          }
+
+          // If the contents are an array, recursively search them
+          if (Array.isArray(contents)) {
+              const foundEntries = findFolder(contents, folderToFind);
+              if (foundEntries) {
+                  return foundEntries; // Return the found entries
+              }
+          }
+      }
+      return null; 
+  }
+
+  if (finalData) {
+      const entries = findFolder(namesArray, lastFolderName);
+      if (Array.isArray(entries)) {
+          extractFolder(entries, folderName); 
+      } else {
+          console.log(`No entries found for folder: ${lastFolderName}`);
+      }
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
